@@ -31,24 +31,14 @@ script:
   - docker exec con_test mv kallisto/test/output travis-ci/output
   
   #Plot results from a jupyter notebook
-  - docker exec con_test jupyter nbconvert --to html --execute Travis_Plotting.ipynb
+  - docker exec con_test jupyter nbconvert --to=html --execute Travis_Plotting.ipynb
 
   #Copy output out of container
   - docker cp con_test:/travis-ci travis-ci
-  
-  #Push results back to github
-  - git config user.email "brettbj@gmail.com"
-  - git config user.name "Brett Beaulieu-Jones"
-  - git config --global push.default simple
-  - git remote set-url origin https://brettbj:$git_publish_key@github.com/greenelab/continuous_analysis.git
-  
-  - git checkout master
-  - git pull
-  - git add travis-ci/.
-  - git commit -a -m "Travis-CI output [CI SKIP] [SKIP CI] ."
-  - git stash 
-  - git push
-  
+
 after_success:
-  - docker build -t brettbj/continuous_analysis .
-  - docker push brettbj/continuous_analysis:latest
+  - test $TRAVIS_BRANCH = "master" &&
+    test $TRAVIS_PULL_REQUEST = "false" &&
+    sh travis-ci/deploy.sh &&
+    docker build --tag=brettbj/continuous_analysis . &&
+    docker push brettbj/continuous_analysis:latest
