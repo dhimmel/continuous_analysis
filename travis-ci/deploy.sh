@@ -38,5 +38,5 @@ $TRAVIS_COMMIT_MESSAGE
 
 git checkout master
 git add travis-ci
-git commit --all --message="$MESSAGE"
+git commit --message="$MESSAGE"
 git push
